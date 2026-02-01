@@ -29,67 +29,69 @@ export const eventoGetAllGraphQLAction = async ({
 }: EventoGraphQLProps): Promise<EventoGraphQLActionResponse> => {
   try {
     const query = `
-   query {
-    eventos(sort: "rank:asc"){
-    data {
-      id
-      attributes {
-        name,
-        descriptions,
-        data_inicio,
-        localizacao,
-        slug,
-        status,
-        imagem{
-          data{
-            attributes{
-              name,
-              url
+      query GetEventos($page: Int!, $pageSize: Int!) {
+        eventos(
+          sort: "rank:asc"
+          pagination: { page: $page, pageSize: $pageSize }
+        ) {
+          data {
+            id
+            attributes {
+              name
+              descriptions
+              data_inicio
+              localizacao
+              slug
+              status
+              imagem {
+                data {
+                  attributes {
+                    name
+                    url
+                  }
+                }
+              }
+            }
+          }
+          meta {
+            pagination {
+              total
+              page
+              pageSize
+              pageCount
             }
           }
         }
       }
-    }
-    meta {
-      pagination {
-        total
-        page
-        pageSize
-        pageCount
-      }
-    }
-  }
-}
     `;
 
-    const response = await axios.post(
-      strapiGraphQLURL,
-      {
+    // Usar fetch nativo para aprovechar el cache de Next.js
+    const response = await fetch(strapiGraphQLURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         query,
         variables: {
           page,
           pageSize,
         },
+      }),
+      next: { 
+        revalidate: 60, // Revalida cada 60 segundos
+        tags: ['eventos'] // Para revalidación on-demand si lo necesitas
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    });
 
-    // Verificar si hay errores en la respuesta GraphQL
-    if (response.data.errors) {
-      console.error("GraphQL errors:", response.data.errors);
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error("GraphQL errors:", data.errors);
       throw new Error("GraphQL query failed");
     }
 
-    // Usar el mapper para convertir la respuesta
-    const mappedResponse = EventoMappers.fromStrapiGraphQLResponseToEntity(
-      response.data
-    );
-
-    return mappedResponse;
+    return EventoMappers.fromStrapiGraphQLResponseToEntity(data);
   } catch (error) {
     console.error("Error fetching evento data from GraphQL:", error);
     throw error;
