@@ -8,18 +8,22 @@ import { BlogsCarousel } from "@/components/sections/blog/blog-carousel.componen
 import { blogGetAllGraphQLAction } from "@/insfractucture/actions/blogs/graphql/get-blogs-actions";
 import { eventoGetAllGraphQLAction } from "@/insfractucture/actions/eventos/graphql/get-eventos.actions";
 import { CarruselImagenComponents } from "@/components/sections/home/CarruselImagen";
-import {  LocationSectionComplete } from "@/components/sections/mapa/mapa-section";
+import { LocationSectionComplete } from "@/components/sections/mapa/mapa-section";
 import { sermonGetAllGraphQLAction } from "@/insfractucture/actions/sermones/graphql/get-all-sermones.actions";
+
 import MinimalHero from "./components/hero";
+import { versiculoDoDiaGetLatestGraphQLAction } from "@/insfractucture/actions/versiculos-do-dias/graphql/get-versiculos.action";
 
 async function getHomePageData() {
   try {
-    const [blogsResult, eventosResult, sermonesResult] =
+    const [blogsResult, eventosResult, sermonesResult, versiculoResult] =
       await Promise.allSettled([
         blogGetAllGraphQLAction({ page: 1, pageSize: 6 }),
         eventoGetAllGraphQLAction({ page: 1, pageSize: 6 }),
         sermonGetAllGraphQLAction({ page: 1, pageSize: 6 }),
+        versiculoDoDiaGetLatestGraphQLAction(),
       ]);
+
     const blogs =
       blogsResult.status === "fulfilled"
         ? blogsResult.value.blogs.slice(0, 6)
@@ -32,10 +36,16 @@ async function getHomePageData() {
       sermonesResult?.status === "fulfilled"
         ? sermonesResult.value.sermones.slice(0, 6)
         : [];
+    const versiculo =
+      versiculoResult.status === "fulfilled"
+        ? versiculoResult.value
+        : null;
+
     return {
       blogs,
       eventos,
       sermones,
+      versiculo,
     };
   } catch (error) {
     console.error(error);
@@ -43,12 +53,14 @@ async function getHomePageData() {
       blogs: [],
       eventos: [],
       sermones: [],
+      versiculo: null,
     };
   }
 }
 
 export default async function Home() {
-  const { blogs, eventos, sermones } = await getHomePageData();
+  const { blogs, eventos, sermones, versiculo } = await getHomePageData();
+
   return (
     <main className="min-h-screen bg-white">
       <MinimalHero />
@@ -57,7 +69,7 @@ export default async function Home() {
       <TestimonioSection backgroundVariant="gradient" />
       <LocationSectionComplete backgroundVariant="white" />
       <BlogsCarousel blogs={blogs} backgroundVariant="gradient" />
-      <VersiculoDelDia />
+      <VersiculoDelDia versiculo={versiculo} />
       <SermonesCarousel sermones={sermones} />
       <FormularioComponent />
     </main>
@@ -68,7 +80,6 @@ export const metadata: Metadata = {
   title: "Igreja Batista Renovada Sonho de Deus | Santo André - SP",
   description:
     "Bem-vindo à Igreja Batista Renovada Sonho de Deus em Santo André. Um lugar de fé, esperança e amor onde você encontrará comunhão, crescimento espiritual e a presença de Deus. Participe dos nossos cultos, eventos e estudos bíblicos.",
-
   keywords: [
     "Igreja Batista Renovada",
     "Sonho de Deus",
@@ -103,7 +114,7 @@ export const metadata: Metadata = {
     title: "Igreja Batista Renovada Sonho de Deus | Santo André - SP",
     description:
       "Um lugar de fé, esperança e amor em Santo André. Venha fazer parte da nossa comunidade cristã e crescer espiritualmente conosco.",
-    url: "https://seudominio.com.br", 
+    url: "https://seudominio.com.br",
     siteName: "Igreja Batista Renovada Sonho de Deus",
     images: [
       {
@@ -128,13 +139,10 @@ export const metadata: Metadata = {
     description:
       "Um lugar de fé, esperança e amor em Santo André - SP. Venha nos conhecer!",
     images: ["/logo.jpg"],
-    creator: "@ibr_sonhodedeus", 
+    creator: "@ibr_sonhodedeus",
   },
   icons: {
-    icon: [
-  
-      { url: "/logo.jpg", sizes: "32x32", type: "image/jpeg" },
-    ],
+    icon: [{ url: "/logo.jpg", sizes: "32x32", type: "image/jpeg" }],
     apple: [{ url: "/logo.jpg", sizes: "180x180", type: "image/jpeg" }],
   },
   manifest: "/manifest.json",
@@ -150,12 +158,11 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://seudominio.com.br", 
+    canonical: "https://seudominio.com.br",
   },
   viewport: {
     width: "device-width",
     initialScale: 1,
     maximumScale: 1,
   },
-
 };
