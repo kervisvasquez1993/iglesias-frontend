@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import Image from "next/image";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
