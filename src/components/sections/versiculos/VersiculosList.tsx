@@ -26,37 +26,48 @@ function formatDate(dateStr: string): string {
 
 function VersiculoCard({ versiculo }: { versiculo: IVersiculoResponse }) {
   return (
-    <article className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md hover:shadow-xl border border-church-blue-100 transition-all duration-300 hover:-translate-y-1 p-8 flex flex-col gap-5">
-      {/* Badge de tipo */}
-      {versiculo.type && (
-        <span className="self-start inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-church-sky-100 text-church-blue-700 border border-church-sky-200">
-          {versiculo.type}
-        </span>
-      )}
+    <Link href={`/versiculos/${versiculo.id}`} className="group block">
+      <article className="h-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-md group-hover:shadow-xl border border-church-blue-100 transition-all duration-300 group-hover:-translate-y-1 p-8 flex flex-col gap-5 cursor-pointer">
+        {/* Badge de tipo */}
+        {versiculo.type && (
+          <span className="self-start inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-church-sky-100 text-church-blue-700 border border-church-sky-200">
+            {versiculo.type}
+          </span>
+        )}
 
-      {/* Referencia / nombre */}
-      {versiculo.name && (
-        <h2 className="text-xl font-bold text-church-blue-800 leading-snug">
-          {versiculo.name}
-        </h2>
-      )}
+        {/* Referencia / nombre */}
+        {versiculo.name && (
+          <h2 className="text-xl font-bold text-church-blue-800 leading-snug group-hover:text-church-blue-600 transition-colors duration-200">
+            {versiculo.name}
+          </h2>
+        )}
 
-      {/* Texto del versículo */}
-      <blockquote className="relative text-church-blue-700 leading-relaxed text-base italic pl-5 border-l-4 border-church-sky-400">
-        <span className="absolute -left-2 -top-3 text-5xl text-church-sky-300 font-serif leading-none select-none">
-          "
-        </span>
-        {versiculo.descriptions}
-      </blockquote>
+        {/* Texto del versículo */}
+        <blockquote className="relative text-church-blue-700 leading-relaxed text-base italic pl-5 border-l-4 border-church-sky-400 flex-1">
+          <span className="absolute -left-2 -top-3 text-5xl text-church-sky-300 font-serif leading-none select-none">
+            "
+          </span>
+          {/* Truncar en la lista para que no sea muy largo */}
+          <span className="line-clamp-5">{versiculo.descriptions}</span>
+        </blockquote>
 
-      {/* Fecha */}
-      <p className="text-xs text-church-blue-400 mt-auto">
-        {formatDate(versiculo.publishedAt)}
-      </p>
-    </article>
+        {/* Footer: fecha + leer más */}
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <p className="text-xs text-church-blue-400">
+            {new Intl.DateTimeFormat("pt-BR", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            }).format(new Date(versiculo.publishedAt))}
+          </p>
+          <span className="text-xs font-semibold text-church-blue-500 group-hover:text-church-blue-700 group-hover:underline transition-all duration-200">
+            Ler mais →
+          </span>
+        </div>
+      </article>
+    </Link>
   );
 }
-
 // ─── Paginación ────────────────────────────────────────────────────────────────
 
 function Pagination({
@@ -129,7 +140,8 @@ export function VersiculosListComponent({
         </p>
         {pagination && (
           <p className="text-church-sky-200 text-sm mt-3">
-            {pagination.total} versículo{pagination.total !== 1 ? "s" : ""} disponíve{pagination.total !== 1 ? "is" : "l"}
+            {pagination.total} versículo{pagination.total !== 1 ? "s" : ""}{" "}
+            disponíve{pagination.total !== 1 ? "is" : "l"}
           </p>
         )}
       </div>
