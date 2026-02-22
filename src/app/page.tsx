@@ -65,11 +65,13 @@ export default async function Home() {
     <main className="min-h-screen bg-white">
       <MinimalHero />
       <EventosCarousel eventos={eventos} />
-      <CarruselImagenComponents backgroundVariant="dark" />
+        <VersiculoDelDia versiculo={versiculo} />
+    
       <TestimonioSection backgroundVariant="gradient" />
+        <CarruselImagenComponents backgroundVariant="dark" />
       <LocationSectionComplete backgroundVariant="white" />
       <BlogsCarousel blogs={blogs} backgroundVariant="gradient" />
-      <VersiculoDelDia versiculo={versiculo} />
+
       <SermonesCarousel sermones={sermones} />
       <FormularioComponent />
     </main>

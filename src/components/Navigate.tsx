@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Menu, X, Home, Calendar, BookOpen, Volume2, Users, ChevronRight, Heart, Globe } from "lucide-react";
+import { Menu, X, Home, Calendar, BookOpen, Volume2, Users, ChevronRight, Heart, Globe, BookMarked } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Início", icon: Home },
   { href: "/eventos", label: "Atividades", icon: Calendar },
   { href: "/blog", label: "Blogs", icon: BookOpen },
+  { href: "/versiculos", label: "Versículos", icon: BookMarked },
   { href: "/sermones", label: "Sermões", icon: Volume2 },
   { href: "/misioneros", label: "Missionários", icon: Globe },
   { href: "/comunidade", label: "nossa comunidade", icon: Users },

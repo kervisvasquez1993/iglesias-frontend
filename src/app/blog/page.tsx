@@ -9,8 +9,7 @@ async function getBlogsGraphQL(page: number = 1, locale: string = "pt"): Promise
   error?: string
 }> {
   try {
-    console.log(`🌐 Cargando blogs para locale: ${locale}`);
-    
+  
     // Usar el action correspondiente según el locale
     const response = locale === "es" 
       ? await blogGetSpanishGraphQLAction({ page, pageSize: 10 })
