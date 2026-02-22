@@ -1,34 +1,52 @@
-
-import { IMisioneroFile, IMisioneroResponse, PaginationMeta, StrapiMisioneroEntity, StrapiMisioneroGraphQLResponse } from "@/insfractucture/interfaces/misiones/misiones.interfaces";
-
+import {
+  IMisioneroFile,
+  IMisioneroResponse,
+  PaginationMeta,
+  StrapiMisioneroEntity,
+  StrapiMisioneroGraphQLResponse,
+} from "@/insfractucture/interfaces/misiones/misiones.interfaces";
 
 const STRAPI_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://strapi-strapibackend-qgcuz6-1680e6-31-97-168-219.traefik.me";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://strapi-strapibackend-qgcuz6-1680e6-31-97-168-219.traefik.me";
 
 export class MisioneroMappers {
+  /**
+   * Resuelve URL relativa a absoluta
+   */
+  private static resolveUrl(url: string): string {
+    return url.startsWith("http") ? url : `${STRAPI_BASE_URL}${url}`;
+  }
+
   /**
    * Mapea un entity individual de Strapi a nuestra interface
    */
   static fromStrapiEntityToEntity(entity: StrapiMisioneroEntity): IMisioneroResponse {
     const { attributes } = entity;
 
+    // Mapear archivos múltiples (file)
     const files: IMisioneroFile[] = (attributes.file?.data ?? []).map((fileEntity) => ({
       id: fileEntity.id,
       name: fileEntity.attributes.name,
-      url: fileEntity.attributes.url.startsWith("http")
-        ? fileEntity.attributes.url
-        : `${STRAPI_BASE_URL}${fileEntity.attributes.url}`,
+      url: this.resolveUrl(fileEntity.attributes.url),
       mime: fileEntity.attributes.mime,
       ext: fileEntity.attributes.ext,
       size: fileEntity.attributes.size,
       alternativeText: fileEntity.attributes.alternativeText,
     }));
 
+    // Mapear imagen principal (single media)
+    const imagenData = attributes.imagen?.data;
+    const image = imagenData
+      ? this.resolveUrl(imagenData.attributes.url)
+      : null;
+
     return {
       id: entity.id,
       title: attributes.title,
       slug: attributes.slug,
       descriptions: attributes.Descriptions,
+      image,
       files,
       publishedAt: attributes.publishedAt,
       createdAt: attributes.createdAt,

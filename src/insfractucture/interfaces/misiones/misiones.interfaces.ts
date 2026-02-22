@@ -4,6 +4,7 @@ export interface IMisioneroResponse {
   title: string;
   slug: string;
   descriptions: string;
+  image: string | null; // imagen principal
   files: IMisioneroFile[];
   publishedAt: string;
   createdAt: string;
@@ -43,6 +44,9 @@ export interface StrapiMisioneroEntity {
     updatedAt: string;
     file: {
       data: StrapiUploadFileEntity[];
+    };
+    imagen: {
+      data: StrapiUploadFileEntity | null;
     };
   };
 }

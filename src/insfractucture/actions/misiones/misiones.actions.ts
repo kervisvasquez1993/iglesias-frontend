@@ -21,6 +21,45 @@ interface MisioneroGraphQLActionResponse {
   };
 }
 
+// Fragment reutilizable para los campos de misionero
+const MISIONERO_FIELDS = `
+  id
+  attributes {
+    title
+    slug
+    Descriptions
+    publishedAt
+    createdAt
+    updatedAt
+    imagen {
+      data {
+        id
+        attributes {
+          name
+          url
+          mime
+          ext
+          size
+          alternativeText
+        }
+      }
+    }
+    file {
+      data {
+        id
+        attributes {
+          name
+          url
+          mime
+          ext
+          size
+          alternativeText
+        }
+      }
+    }
+  }
+`;
+
 /**
  * Obtener todos los misioneros con paginación
  */
@@ -33,28 +72,7 @@ export const misioneroGetAllGraphQLAction = async ({
       query GetMisioneros($page: Int, $pageSize: Int) {
         misioneros(pagination: { page: $page, pageSize: $pageSize }, sort: "publishedAt:desc") {
           data {
-            id
-            attributes {
-              title
-              slug
-              Descriptions
-              publishedAt
-              createdAt
-              updatedAt
-              file {
-                data {
-                  id
-                  attributes {
-                    name
-                    url
-                    mime
-                    ext
-                    size
-                    alternativeText
-                  }
-                }
-              }
-            }
+            ${MISIONERO_FIELDS}
           }
           meta {
             pagination {
@@ -85,7 +103,6 @@ export const misioneroGetAllGraphQLAction = async ({
     }
 
     const mappedResponse = MisioneroMappers.fromStrapiGraphQLResponseToEntity(response.data);
-
     return mappedResponse;
   } catch (error) {
     console.error("Error fetching misioneros from GraphQL:", error);
@@ -106,28 +123,7 @@ export const misioneroGetBySlugGraphQLAction = async ({
       query GetMisioneroBySlug($slug: String!) {
         misioneros(filters: { slug: { eq: $slug } }) {
           data {
-            id
-            attributes {
-              title
-              slug
-              Descriptions
-              publishedAt
-              createdAt
-              updatedAt
-              file {
-                data {
-                  id
-                  attributes {
-                    name
-                    url
-                    mime
-                    ext
-                    size
-                    alternativeText
-                  }
-                }
-              }
-            }
+            ${MISIONERO_FIELDS}
           }
         }
       }
@@ -170,28 +166,7 @@ export const misioneroGetAllGraphQLSimpleAction = async (): Promise<IMisioneroRe
       query {
         misioneros(sort: "publishedAt:desc") {
           data {
-            id
-            attributes {
-              title
-              slug
-              Descriptions
-              publishedAt
-              createdAt
-              updatedAt
-              file {
-                data {
-                  id
-                  attributes {
-                    name
-                    url
-                    mime
-                    ext
-                    size
-                    alternativeText
-                  }
-                }
-              }
-            }
+            ${MISIONERO_FIELDS}
           }
         }
       }

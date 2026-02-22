@@ -1,8 +1,9 @@
 "use client";
+
+import { MarkdownRenderer } from "@/app/eventos/components/MarkdownRenderer";
 import { IMisioneroResponse } from "@/insfractucture/interfaces/misiones/misiones.interfaces";
 import Image from "next/image";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
 
 interface MisionerosListProps {
   misioneros: IMisioneroResponse[];
@@ -51,18 +52,15 @@ interface MisioneroCardProps {
 }
 
 const MisioneroCard = ({ misionero }: MisioneroCardProps) => {
-  // Obtener la primera imagen como thumbnail
-  const thumbnail = misionero.files.find((f) => f.mime.startsWith("image/"));
-
   return (
     <Link href={`/misioneros/${misionero.slug}`}>
       <article className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-church-blue-100 hover:border-church-blue-300 transform hover:-translate-y-1">
-        {/* Imagen */}
+        {/* Imagen principal */}
         <div className="relative h-56 w-full overflow-hidden bg-church-blue-50">
-          {thumbnail ? (
+          {misionero.image ? (
             <Image
-              src={thumbnail.url}
-              alt={thumbnail.alternativeText || misionero.title}
+              src={misionero.image}
+              alt={misionero.title}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -93,10 +91,12 @@ const MisioneroCard = ({ misionero }: MisioneroCardProps) => {
           </h3>
 
           {misionero.descriptions && (
-            <div className="text-church-blue-600 text-sm line-clamp-3 mb-4 prose prose-sm max-w-none">
-              <ReactMarkdown>
-                {misionero.descriptions.substring(0, 200)}
-              </ReactMarkdown>
+            <div className="text-sm line-clamp-3 mb-4">
+              <MarkdownRenderer
+                content={misionero.descriptions.substring(0, 200)}
+                variant="compact"
+                maxLines={3}
+              />
             </div>
           )}
 
