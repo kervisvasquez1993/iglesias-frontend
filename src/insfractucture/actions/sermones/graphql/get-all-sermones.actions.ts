@@ -1,16 +1,18 @@
-import axios from "axios";
-import { SermonResponse } from "@/insfractucture/interfaces/sermones/sermones.interfaces";
-import { SermonMappers } from "@/insfractucture/mappers/sermones/sermones.mapers";
+// src/insfractucture/actions/sermones/graphql/get-all-sermones.actions.ts
 
+import axios from 'axios';
+import { SermonResponse } from '@/insfractucture/interfaces/sermones/sermones.interfaces';
+import { SermonMappers } from '@/insfractucture/mappers/sermones/sermones.mapers';
 
-const strapiGraphQLURL = process.env.NEXT_PUBLIC_API_URL_GRAPHQL || "http://strapi-strapibackend-qgcuz6-1680e6-31-97-168-219.traefik.me/graphql";
+const strapiGraphQLURL =
+  process.env.NEXT_PUBLIC_API_URL_GRAPHQL ||
+  'http://strapi-strapibackend-qgcuz6-1680e6-31-97-168-219.traefik.me/graphql';
 
 interface SermonGraphQLProps {
   page?: number;
   pageSize?: number;
 }
 
-// Respuesta del action que incluye sermones mapeados y paginación
 interface SermonGraphQLActionResponse {
   sermones: SermonResponse[];
   pagination: {
@@ -21,6 +23,23 @@ interface SermonGraphQLActionResponse {
   };
 }
 
+// ─── Fragment reutilizable con todos los campos ────────────────────────
+const SERMON_FIELDS = `
+  titulo
+  slug
+  url_youtube
+  url_facebook
+  type
+  contents
+  pregador
+  conclusoes
+  activo
+  createdAt
+  updatedAt
+  publishedAt
+`;
+
+// ─── GET ALL (con paginación) ──────────────────────────────────────────
 export const sermonGetAllGraphQLAction = async ({
   page = 1,
   pageSize = 10,
@@ -32,15 +51,7 @@ export const sermonGetAllGraphQLAction = async ({
           data {
             id
             attributes {
-              titulo
-              url_youtube
-              url_facebook
-              type
-              contents
-              activo
-              createdAt
-              updatedAt
-              publishedAt
+              ${SERMON_FIELDS}
             }
           }
           meta {
@@ -55,7 +66,6 @@ export const sermonGetAllGraphQLAction = async ({
       }
     `;
 
-
     const response = await axios.post(
       strapiGraphQLURL,
       {
@@ -67,30 +77,30 @@ export const sermonGetAllGraphQLAction = async ({
       },
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
-
     if (response.data.errors) {
-      console.error("GraphQL errors:", response.data.errors);
-      throw new Error("GraphQL query failed");
+      console.error('GraphQL errors:', response.data.errors);
+      throw new Error('GraphQL query failed');
     }
 
-    const mappedResponse = SermonMappers.fromStrapiGraphQLResponseToEntity(response.data);
-    
-
+    const mappedResponse =
+      SermonMappers.fromStrapiGraphQLResponseToEntity(response.data);
 
     return mappedResponse;
   } catch (error) {
-    console.error("Error fetching sermon data from GraphQL:", error);
+    console.error('Error fetching sermon data from GraphQL:', error);
     throw error;
   }
 };
 
-// Action simplificado que devuelve solo el array de sermones (sin paginación)
-export const sermonGetAllGraphQLSimpleAction = async (): Promise<SermonResponse[]> => {
+// ─── GET ALL (sin paginación) ──────────────────────────────────────────
+export const sermonGetAllGraphQLSimpleAction = async (): Promise<
+  SermonResponse[]
+> => {
   try {
     const query = `
       query {
@@ -98,15 +108,7 @@ export const sermonGetAllGraphQLSimpleAction = async (): Promise<SermonResponse[
           data {
             id
             attributes {
-              titulo
-              url_youtube
-              url_facebook
-              type
-              contents
-              activo
-              createdAt
-              updatedAt
-              publishedAt
+              ${SERMON_FIELDS}
             }
           }
         }
@@ -118,28 +120,31 @@ export const sermonGetAllGraphQLSimpleAction = async (): Promise<SermonResponse[
       { query },
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
     if (response.data.errors) {
-      console.error("GraphQL errors:", response.data.errors);
-      throw new Error("GraphQL query failed");
+      console.error('GraphQL errors:', response.data.errors);
+      throw new Error('GraphQL query failed');
     }
 
-    // Usar el mapper para convertir solo los sermones
-    const mappedSermones = SermonMappers.fromStrapiGraphQLArrayToEntity(response.data.data.sermones.data);
+    const mappedSermones = SermonMappers.fromStrapiGraphQLArrayToEntity(
+      response.data.data.sermones.data
+    );
 
     return mappedSermones;
   } catch (error) {
-    console.error("Error fetching sermon data from GraphQL:", error);
+    console.error('Error fetching sermon data from GraphQL:', error);
     throw error;
   }
 };
 
-// Action para obtener sermón por ID
-export const sermonGetByIdGraphQLAction = async (id: string): Promise<SermonResponse | null> => {
+// ─── GET BY ID ─────────────────────────────────────────────────────────
+export const sermonGetByIdGraphQLAction = async (
+  id: string
+): Promise<SermonResponse | null> => {
   try {
     const query = `
       query GetSermonById($id: ID!) {
@@ -147,22 +152,12 @@ export const sermonGetByIdGraphQLAction = async (id: string): Promise<SermonResp
           data {
             id
             attributes {
-              titulo
-              url_youtube
-              url_facebook
-              type
-              contents
-              activo
-              createdAt
-              updatedAt
-              publishedAt
+              ${SERMON_FIELDS}
             }
           }
         }
       }
     `;
-
-    console.log('🚀 Buscando sermón por ID:', id);
 
     const response = await axios.post(
       strapiGraphQLURL,
@@ -172,31 +167,76 @@ export const sermonGetByIdGraphQLAction = async (id: string): Promise<SermonResp
       },
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
     if (response.data.errors) {
-      console.error("GraphQL errors:", response.data.errors);
-      throw new Error("GraphQL query failed");
+      console.error('GraphQL errors:', response.data.errors);
+      throw new Error('GraphQL query failed');
     }
 
     const sermon = response.data.data.sermon.data;
-    
+
     if (!sermon) {
-      console.log('❌ No se encontró sermón con ID:', id);
       return null;
     }
 
-    // Usar el mapper para convertir el sermón encontrado
     const mappedSermon = SermonMappers.fromStrapiGraphQLToEntity(sermon);
-    
-    console.log('✨ Sermón encontrado:', mappedSermon);
     return mappedSermon;
-
   } catch (error) {
-    console.error("Error fetching sermon by ID:", error);
+    console.error('Error fetching sermon by ID:', error);
+    throw error;
+  }
+};
+
+// ─── GET BY SLUG ───────────────────────────────────────────────────────
+export const sermonGetBySlugGraphQLAction = async (
+  slug: string
+): Promise<SermonResponse | null> => {
+  try {
+    const query = `
+      query GetSermonBySlug($slug: String!) {
+        sermones(filters: { slug: { eq: $slug } }, pagination: { page: 1, pageSize: 1 }) {
+          data {
+            id
+            attributes {
+              ${SERMON_FIELDS}
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await axios.post(
+      strapiGraphQLURL,
+      {
+        query,
+        variables: { slug },
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.data.errors) {
+      console.error('GraphQL errors:', response.data.errors);
+      throw new Error('GraphQL query failed');
+    }
+
+    const sermones = response.data.data.sermones.data;
+
+    if (!sermones || sermones.length === 0) {
+      return null;
+    }
+
+    const mappedSermon = SermonMappers.fromStrapiGraphQLToEntity(sermones[0]);
+    return mappedSermon;
+  } catch (error) {
+    console.error('Error fetching sermon by slug:', error);
     throw error;
   }
 };

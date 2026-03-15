@@ -1,14 +1,21 @@
-// Interfaces actualizadas para sermones
+// src/insfractucture/interfaces/sermones/sermones.interfaces.ts
+
+// ─── Response mapeada para uso en componentes ──────────────────────────
 export interface SermonResponse {
   id: number;
   titulo: string;
+  slug: string;
   descripcion: string;
   url_youtube: string;
   url_facebook?: string | null;
-  type: string; 
+  type: string;
+  contents: string;
+  pregador: string;
+  conclusoes: string;
   activo: boolean;
   created_at: string;
   updated_at: string;
+  published_at: string | null;
   youtube_video_id: string;
   youtube_embed_url: string;
   youtube_thumbnail: string;
@@ -22,6 +29,9 @@ export interface CreateSermonPayload {
   url_youtube: string;
   url_facebook?: string;
   type?: string;
+  contents?: string;
+  pregador?: string;
+  conclusoes?: string;
   activo?: boolean;
 }
 
@@ -31,10 +41,13 @@ export interface UpdateSermonPayload {
   url_youtube?: string;
   url_facebook?: string;
   type?: string;
+  contents?: string;
+  pregador?: string;
+  conclusoes?: string;
   activo?: boolean;
 }
 
-
+// ─── Interfaces GraphQL de Strapi ──────────────────────────────────────
 export interface IStrapiGraphQLSermonResponse {
   data: {
     sermones: {
@@ -55,17 +68,19 @@ export interface IStrapiGraphQLSermonData {
   id: string;
   attributes: {
     titulo: string;
+    slug: string;
     url_youtube: string;
     url_facebook: string | null;
     type: string;
-    descriptions: string;
+    contents: string;
+    pregador: string;
+    conclusoes: string;
     activo: boolean;
     createdAt?: string;
     updatedAt?: string;
-    publishedAt?: string;
+    publishedAt?: string | null;
   };
 }
-
 
 export interface IStrapiGraphQLSermonSimpleResponse {
   data: {
