@@ -388,7 +388,7 @@ export default async function BlogDetailPage({
             </div>
           </div>
 
-          <div className="p-8 md:p-12">
+          <div className="p-4 sm:p-8 md:p-12">
             {/* Header del artículo */}
             <div className="text-center mb-8">
               <div className="flex justify-center mb-4">
@@ -464,12 +464,14 @@ export default async function BlogDetailPage({
             <div className="prose prose-lg max-w-none">
               {/* Descripción como extracto destacado */}
               {blog.description && (
-                <div className="bg-gradient-to-r from-church-gold-100 to-church-blue-100 border-l-4 border-church-gold-500 rounded-r-xl p-6 mb-8 shadow-lg">
+                <div className="bg-gradient-to-r from-church-gold-100 to-church-blue-100 border-l-4 border-church-gold-500 rounded-r-xl p-4 sm:p-6 mb-8 shadow-lg">
+
                   <div className="flex items-start space-x-3">
                     <div className="w-8 h-8 bg-church-gold-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
                       <Heart className="w-4 h-4 text-white" />
                     </div>
-                    <blockquote className="text-xl text-church-blue-800 font-medium italic leading-relaxed">
+                    <blockquote className="text-base sm:text-xl text-church-blue-800 font-medium italic leading-relaxed">
+
                       &ldquo;{blog.description}&rdquo;
                     </blockquote>
                   </div>
@@ -477,7 +479,8 @@ export default async function BlogDetailPage({
               )}
 
               {/* Contenido principal con Markdown */}
-              <div className="bg-white/80 rounded-xl p-8 border border-church-sky-200 shadow-lg">
+              <div className="bg-white/80 rounded-xl p-4 sm:p-8 border border-church-sky-200 shadow-lg">
+
                 <div className="text-church-blue-700 leading-relaxed">
                   {blog.content ? (
                     <ReactMarkdown
@@ -503,7 +506,8 @@ export default async function BlogDetailPage({
 
             {/* Footer del artículo mejorado */}
             <div className="mt-12 pt-8 border-t border-church-sky-200">
-              <div className="bg-church-sky-50 rounded-xl p-6 border border-church-sky-200">
+              <div className="bg-church-sky-50 rounded-xl p-4 sm:p-6 border border-church-sky-200">
+
                 <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
                   <div className="text-church-blue-600">
                     <div className="flex items-center space-x-2 mb-2">
@@ -541,7 +545,8 @@ export default async function BlogDetailPage({
 
         {/* Call to action final */}
         <div className="mt-12 text-center">
-          <div className="bg-gradient-to-r from-church-blue-500 to-church-gold-500 p-8 rounded-2xl text-white shadow-xl">
+          <div className="bg-gradient-to-r from-church-blue-500 to-church-gold-500 p-4 sm:p-8 rounded-2xl text-white shadow-xl">
+
             <h3 className="text-2xl font-bold mb-3 flex items-center justify-center">
               <Sparkles className="w-6 h-6 mr-2" />
               {t.likedReflection}

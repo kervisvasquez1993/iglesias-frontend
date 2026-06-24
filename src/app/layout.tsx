@@ -1,5 +1,6 @@
 // app/layout.tsx
 import { MinimalHeader } from "@/components/ui/header";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, Lora } from "next/font/google";
@@ -7,7 +8,7 @@ import type React from "react";
 import { Footer } from "@/components/sections/footer/footer";
 import QueryProvider from "@/providers/QueryProvider";
 import { Toaster } from "sonner";
-import { Matomo } from "@/analytics/Matomo";
+
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,7 +73,7 @@ export default function RootLayout({
           <Footer />
           
           {/* Matomo Analytics - activado también en desarrollo para testing */}
-          <Matomo />
+          <Analytics />
         </QueryProvider>
       </body>
     </html>
