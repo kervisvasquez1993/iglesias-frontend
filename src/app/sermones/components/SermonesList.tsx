@@ -13,14 +13,18 @@ import {
   Video,
   User,
   BookOpen,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SermonResponse } from "@/insfractucture/interfaces/sermones/sermones.interfaces";
+import { PaginationMeta } from "@/insfractucture/interfaces/blogs/blog.interfaces";
+import { loadMoreSermonesAction } from "../actions";
 
 interface SermonesListComponentProps {
   sermones: SermonResponse[];
+  pagination?: PaginationMeta;
 }
 
 // ─── Mapa de tipos para badges ─────────────────────────────────────────
@@ -67,13 +71,68 @@ const getContentPreview = (text: string, maxLength: number = 150): string => {
 };
 
 export function SermonesListComponent({
-  sermones,
+  sermones: initialSermones,
+  pagination,
 }: SermonesListComponentProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [sermones, setSermones] = useState<SermonResponse[]>(initialSermones);
+  const [currentPage, setCurrentPage] = useState(pagination?.page ?? 1);
+  const [pageCount, setPageCount] = useState(pagination?.pageCount ?? 1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const loadingRef = useRef(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const pageSize = pagination?.pageSize ?? 10;
+  const total = pagination?.total ?? sermones.length;
+  const hasMore = currentPage < pageCount;
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  // ─── Cargar la siguiente página ──────────────────────────────────────
+  const loadMore = useCallback(async () => {
+    if (loadingRef.current || !hasMore) return;
+    loadingRef.current = true;
+    setIsLoadingMore(true);
+    setLoadError(false);
+
+    try {
+      const nextPage = currentPage + 1;
+      const response = await loadMoreSermonesAction(nextPage, pageSize);
+
+      setSermones((prev) => {
+        const existingIds = new Set(prev.map((s) => s.id));
+        const nuevos = response.sermones.filter((s) => !existingIds.has(s.id));
+        return [...prev, ...nuevos];
+      });
+      setCurrentPage(response.pagination.page);
+      setPageCount(response.pagination.pageCount);
+    } catch (error) {
+      console.error("Erro ao carregar mais sermões:", error);
+      setLoadError(true);
+    } finally {
+      loadingRef.current = false;
+      setIsLoadingMore(false);
+    }
+  }, [currentPage, hasMore, pageSize]);
+
+  // ─── Scroll infinito: observa el final de la lista ───────────────────
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore || loadError) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMore();
+      },
+      { rootMargin: "400px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore, hasMore, loadError]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pt-BR", {
@@ -235,7 +294,7 @@ export function SermonesListComponent({
           >
             <div className="text-center">
               <div className="text-2xl font-bold text-church-blue-900 mb-1">
-                {sermones.length}+
+                {total}
               </div>
               <p className="text-sm text-church-blue-600">
                 Sermões Disponíveis
@@ -260,8 +319,8 @@ export function SermonesListComponent({
           <div className="mt-6">
             <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-church-red-500 text-white shadow-lg">
               <Sparkles className="w-4 h-4 mr-2" />
-              {sermones.length} sermão{sermones.length !== 1 ? "es" : ""}{" "}
-              disponíve{sermones.length !== 1 ? "is" : "l"}
+              {total} sermõ{total !== 1 ? "es" : "o"}{" "}
+              disponíve{total !== 1 ? "is" : "l"}
             </span>
           </div>
         </div>
@@ -286,7 +345,7 @@ export function SermonesListComponent({
                     ? "transform translate-y-0 opacity-100"
                     : "transform translate-y-12 opacity-0"
                 }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
+                style={{ transitionDelay: `${(index % pageSize) * 100}ms` }}
               >
                 <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-3 group border border-church-sky-200 relative h-full flex flex-col">
                   {/* Línea decorativa superior */}
@@ -470,6 +529,41 @@ export function SermonesListComponent({
             );
           })}
         </div>
+
+        {/* Paginación: scroll infinito + botón de respaldo */}
+        {hasMore && (
+          <div ref={sentinelRef} className="mt-12 flex flex-col items-center">
+            {isLoadingMore ? (
+              <div className="flex items-center text-church-blue-600">
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <span className="text-sm font-medium">
+                  Carregando mais sermões...
+                </span>
+              </div>
+            ) : (
+              <>
+                {loadError && (
+                  <p className="text-sm text-church-red-600 mb-3">
+                    Não foi possível carregar mais sermões.
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  className="inline-flex items-center px-6 py-3 bg-church-blue-500 hover:bg-church-blue-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                  {loadError ? "Tentar novamente" : "Carregar mais sermões"}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {!hasMore && sermones.length > pageSize && (
+          <p className="mt-12 text-center text-sm text-church-blue-600">
+            Você chegou ao fim da lista de sermões 🙏
+          </p>
+        )}
 
         {/* CTA final */}
         <div

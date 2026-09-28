@@ -41,7 +41,7 @@ export default async function SermonesPage({ searchParams }: SermonesPageProps) 
   const page = Number(resolvedSearchParams.page) || 1;
   
   console.log('🔄 Usando GraphQL API para Sermões...');
-  const { sermones, error } = await getSermones(page);
+  const { sermones, pagination, error } = await getSermones(page);
 
   if (error) {
     return (
@@ -74,7 +74,7 @@ export default async function SermonesPage({ searchParams }: SermonesPageProps) 
 
   return (
     <div suppressHydrationWarning={true}>
-      <SermonesListComponent sermones={sermones} />
+      <SermonesListComponent sermones={sermones} pagination={pagination} />
     </div>
   );
 }

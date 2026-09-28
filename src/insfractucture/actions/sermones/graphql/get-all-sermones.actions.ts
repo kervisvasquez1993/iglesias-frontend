@@ -11,6 +11,8 @@ const strapiGraphQLURL =
 interface SermonGraphQLProps {
   page?: number;
   pageSize?: number;
+  // Formato Strapi: "campo:asc" | "campo:desc"
+  sort?: string[];
 }
 
 interface SermonGraphQLActionResponse {
@@ -43,11 +45,12 @@ const SERMON_FIELDS = `
 export const sermonGetAllGraphQLAction = async ({
   page = 1,
   pageSize = 10,
+  sort = ['publishedAt:desc'],
 }: SermonGraphQLProps): Promise<SermonGraphQLActionResponse> => {
   try {
     const query = `
-      query GetSermones($page: Int, $pageSize: Int) {
-        sermones(pagination: { page: $page, pageSize: $pageSize }) {
+      query GetSermones($page: Int, $pageSize: Int, $sort: [String]) {
+        sermones(sort: $sort, pagination: { page: $page, pageSize: $pageSize }) {
           data {
             id
             attributes {
@@ -73,6 +76,7 @@ export const sermonGetAllGraphQLAction = async ({
         variables: {
           page,
           pageSize,
+          sort,
         },
       },
       {
